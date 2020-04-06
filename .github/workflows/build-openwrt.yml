@@ -6,7 +6,7 @@
 # Blog: https://p3terx.com
 #=================================================
 
-name: X64软路由
+name: X64软路由-UEFI
 
 on:
   release:
@@ -29,6 +29,7 @@ env:
   SSH_ACTIONS: false
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
+  UPLOAD_COWTRANSFER: true
   TZ: Asia/Shanghai
 
 jobs:
@@ -111,4 +112,10 @@ jobs:
       if: steps.organize.outputs.status == 'success' && !cancelled()
       with:
         name: OpenWrt_firmware
-        path: openwrt/bin/targets/x86/64/openwrt-x86-64-combined-squashfs.img
+        path: openwrt/bin/targets/x86/64/openwrt-x86-64-uefi-gpt-squashfs.img
+
+    - name: Upload firmware to cowtransfer
+      if: env.UPLOAD_COWTRANSFER == 'true' && !cancelled()
+      run: |
+        curl -sL https://git.io/cowtransfer | sh
+        ./cowtransfer-uploader -b 2621440 -s -p 99 -t 3 --hash ${FIRMWARE}
